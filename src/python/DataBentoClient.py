@@ -11,7 +11,7 @@ class DataBentoClient:
         self.client = db.Historical(self.api_key)   
     
     def resolve_symbols(self,client,ds, t0, tf, symbol_ids,type_in,type_out):
-        resolved_symbols={}
+        resolved_symbols_dict={}
         try:
             result = self.client.symbology.resolve(
                 dataset=ds,
@@ -21,16 +21,17 @@ class DataBentoClient:
                 stype_in=type_in,
                 stype_out=type_out
             )
-
-            res=result["result"]
-            for k in res.keys():
-                resolved_symbols[k]=res[k][0]["s"]                
-            return resolved_symbols
+            
+            results_dict=result["result"]
+            for k in results_dict.keys():
+                resolved_symbols_dict[k]=results_dict[k][0]["s"]
+            
+            return resolved_symbols_dict
             
         except BentoClientError as e:
             return []
         
-    def get_historical_data(self, ds, t0, tf, sch, fn,result_limit=5):
+    def get_historical_data(self, ds, t0, tf, sch, output_filename,result_limit=5):
         try:
             data = self.client.timeseries.get_range(
                 dataset=ds,
@@ -43,41 +44,23 @@ class DataBentoClient:
             instrument_ids=df["instrument_id"].to_list()
             stype_in="instrument_id"
             stype_out="raw_symbol"
-
-            resolved_symbols_dict=self.resolve_symbols(client,ds,t0,tf, instrument_ids,stype_in,stype_out)
-            print(resolved_symbols_dict)
             resolved_symbols=[]
-            for id in instrument_ids:
-                k = str(id)
-                if k in resolved_symbols_dict:
-                    resolved_symbols.append(resolved_symbols_dict[k])
-                else:
-                    resolved_symbols.append("NULL")            
-                           
-            if( len(df)==len(resolved_symbols) ):
-                df[df.columns[-1]] = resolved_symbols
+            resolved_symbols_dict=self.resolve_symbols(client,ds,t0,tf, instrument_ids,stype_in,stype_out)
+            #d[instrument_id]=symbol
+            for instrument_id in instrument_ids:
+                sym=resolved_symbols_dict[instrument_id][0]["s"] 
+                resolved_symbols.append(sym)
+           
+            df[df.columns[-1]] = resolved_symbols
 
-            filepath=os.getcwd()+"/"+fn
-            df.to_csv(filepath,index=False)
+            df.to_csv(output_filename,index=False)
             
             return df
         except BentoClientError as e:
             return pd.DataFrame()
-            return None
+            
         
-if __name__=="__main__":
 
-    API_KEY="poop"
-    dataset="GLBX.MDP3"
-    schema="trades"
-    start="2023-07-07T14:30:00"
-    end="2023-07-07T14:40:00"
-    filename="data200.csv"
-    
-    limit=200
-
-    client1=DataBentoClient(API_KEY)
-    client1.get_historical_data(dataset,start,end,schema,filename,limit)
 
      
         
