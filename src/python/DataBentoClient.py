@@ -42,13 +42,15 @@ class DataBentoClient:
             )
             df = data.to_df()
             instrument_ids=df["instrument_id"].to_list()
+            print(instrument_ids)
             stype_in="instrument_id"
             stype_out="raw_symbol"
             resolved_symbols=[]
             resolved_symbols_dict=self.resolve_symbols(client,ds,t0,tf, instrument_ids,stype_in,stype_out)
+            print(resolved_symbols_dict)
             #d[instrument_id]=symbol
-            for instrument_id in instrument_ids:
-                sym=resolved_symbols_dict[instrument_id][0]["s"] 
+            for instrument_id in instrument_ids:                
+                sym=resolved_symbols_dict[str(instrument_id)]
                 resolved_symbols.append(sym)
            
             df[df.columns[-1]] = resolved_symbols
