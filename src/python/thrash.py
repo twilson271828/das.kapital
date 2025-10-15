@@ -4,14 +4,15 @@ if __name__=="__main__":
 
     API_KEY="poop3"
     dataset="GLBX.MDP3"
-    schema="trades"
+    schema="ohlcv-1m"
     stype_in="instrument_id"
     stype_out="raw_symbol"
-    start="2023-07-07T14:30:00"
-    end="2023-07-07T16:40:00"
-    limit=20
+    start="2025-10-14T00:00:00"
+    end="2025-10-14T23:59:59"
+    limit=None
+
     client =DataBentoClient(API_KEY)
-    fn="data10.csv"
+    fn="ohlcv-1m_20251014.csv"
 
     client.get_historical_data(dataset, start, end, schema, fn,limit)
     
