@@ -31,7 +31,7 @@ class DataBentoClient:
         except BentoClientError as e:
             return []
         
-    def get_historical_data(self, ds, t0, tf, sch, output_filename,result_limit=5):
+    def get_historical_data(self, ds, t0, tf, sch, output_filename,result_limit=None):
         try:
             data = self.client.timeseries.get_range(
                 dataset=ds,
